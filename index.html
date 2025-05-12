@@ -5,195 +5,890 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuizCraft - AI-Powered Study Quizzes</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
         :root {
-            --discord-bg: #36393f;
-            --discord-text: #dcddde;
-            --discord-primary: #5865f2;
-            --discord-secondary: #2f3136;
+            --primary: #5865f2;
+            --primary-light: #7289da;
+            --primary-dark: #4752c4;
+            --secondary: #2f3136;
+            --background: #36393f;
+            --background-light: #40444b;
+            --text: #dcddde;
+            --text-muted: #b9bbbe;
+            --success: #57F287;
+            --error: #ED4245;
+            --accent: #EB459E;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
         }
 
         body {
-            background-color: var(--discord-bg);
-            color: var(--discord-text);
+            background-color: var(--background);
+            color: var(--text);
             line-height: 1.6;
+            min-height: 100vh;
+            font-size: 16px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 2rem;
         }
 
         header {
-            background-color: var(--discord-secondary);
-            padding: 1rem 0;
-            position: fixed;
-            width: 100%;
+            background-color: var(--secondary);
+            padding: 1.25rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
             top: 0;
             z-index: 100;
         }
 
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            letter-spacing: 0.5px;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
+        .prompt-section {
+            margin: 2rem 0;
+            background: var(--secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        textarea {
+            width: 100%;
+            background: var(--background);
+            border: 2px solid var(--primary-light);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            min-height: 120px;
+            margin-bottom: 1rem;
+            resize: vertical;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
+            border: none;
+            padding: 0.85rem 1.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-section {
+            display: none;
+            margin-top: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .question-card {
+            background: var(--secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            color: white;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .option {
+            background: var(--background);
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            font-weight: 400;
+        }
+
+        .option:hover {
+            border-color: var(--primary-light);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border-color: transparent;
+            transform: translateX(5px);
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 2rem;
+            background: var(--secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success);
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--background-light);
+        }
+
+        .review-question {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: var(--background);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .review-question:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .correct {
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .incorrect {
+            color: var(--error);
+            font-weight: 500;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 3rem 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .spinner {
+            border: 4px solid rgba(88, 101, 242, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .error-message {
+            background-color: var(--error);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            display: none;
+            box-shadow: var(--shadow);
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-4px); }
+            40%, 60% { transform: translateX(4px); }
         }
 
         .nav-links a {
-            color: var(--discord-text);
+            color: var(--text-muted);
             text-decoration: none;
             margin-left: 2rem;
-            transition: color 0.2s;
+            transition: var(--transition);
         }
 
         .nav-links a:hover {
             color: white;
         }
+        
+        .file-input {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+        
+        .custom-file-upload {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid var(--primary-light);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .file-upload-label svg {
+            margin-right: 10px;
+        }
+        
+        .file-upload-label:hover {
+            background: rgba(88, 101, 242, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .file-info {
+            font-size: 0.8rem;
+            color: var(--text);
+            margin-top: 0.25rem;
+            opacity: 0.8;
+        }
+        
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+        
+        .section-description {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .pdf-upload-container {
+            flex: 1;
+        }
+        
+        .pdf-upload-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background);
+            color: var(--text);
+            padding: 0.85rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid var(--primary-light);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .pdf-upload-btn:hover {
+            background: rgba(88, 101, 242, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        #fileNameDisplay {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text);
+            height: 20px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .generate-btn, .submit-btn, .new-quiz-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-subtext {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
 
         .hero {
-            margin-top: 80px;
+            margin-top: 40px;
             text-align: center;
-            padding: 4rem 0;
+            padding: 5rem 0 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            height: 300px;
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.15), rgba(114, 137, 218, 0.05));
+            transform: skewY(-5deg);
+            z-index: -1;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 3.75rem;
+            line-height: 1.2;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #5865f2, #7289da);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .hero p {
-            font-size: 1.25rem;
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            color: #b9bbbe;
+            font-size: 1.35rem;
+            max-width: 650px;
+            margin: 0 auto 2.5rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
         }
 
         .cta-button {
-            background-color: var(--discord-primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
             border: none;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            border-radius: 4px;
+            padding: 1rem 2.5rem;
+            font-size: 1.15rem;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .cta-button:hover {
-            background-color: #4752c4;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(88, 101, 242, 0.5);
+        }
+        
+        .cta-button:active {
+            transform: translateY(-1px);
+        }
+        
+        .cta-button svg {
+            margin-right: 10px;
         }
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 4rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+            margin: 5rem 0;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
         }
 
         .feature-card {
-            background-color: var(--discord-secondary);
-            padding: 2rem;
-            border-radius: 8px;
-            transition: transform 0.2s;
+            background-color: var(--secondary);
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            border-top: 4px solid transparent;
         }
 
         .feature-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            border-top-color: var(--primary);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.05), transparent);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1;
         }
 
         .feature-card h3 {
             color: white;
             margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-card h3 svg {
+            margin-right: 12px;
+            color: var(--primary);
         }
 
         .feature-card p {
-            color: #b9bbbe;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Quiz Form Styles */
         .quiz-form {
             display: none;
-            background-color: var(--discord-secondary);
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 600px;
+            background-color: var(--secondary);
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 700px;
             margin: 2rem auto;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quiz-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.1), transparent);
+            border-radius: 0 0 0 100%;
         }
 
         .quiz-form.active {
             display: block;
         }
+        
+        .quiz-form h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .quiz-form h2 svg {
+            margin-right: 12px;
+            color: var(--primary);
+        }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.75rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
             color: white;
+            font-weight: 500;
+            font-size: 1.05rem;
         }
 
         .form-group input,
         .form-group textarea {
             width: 100%;
-            padding: 0.75rem;
-            border-radius: 4px;
-            border: 1px solid #40444b;
-            background-color: #40444b;
-            color: var(--discord-text);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--background-light);
+            background-color: var(--background);
+            color: var(--text);
             font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
         }
 
         .form-group textarea {
             min-height: 150px;
             resize: vertical;
+            line-height: 1.5;
+        }
+        
+        .form-group p {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
         .form-buttons {
             display: flex;
             gap: 1rem;
             justify-content: flex-end;
+            margin-top: 2rem;
         }
 
         .cancel-button {
-            background-color: #40444b;
+            background-color: var(--background);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
+            padding: 0.85rem 1.75rem;
+            border-radius: 8px;
             cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cancel-button svg {
+            margin-right: 8px;
         }
 
         .cancel-button:hover {
-            background-color: #4f545c;
+            background-color: var(--background-light);
+            transform: translateY(-2px);
         }
-    </style>
+        </style>
 </head>
 <body>
     <header>
-        <div class="container nav">
+        <div class="container">
             <div class="logo">QuizCraft</div>
-            <div class="nav-links">
-                <a href="#">Home</a>
-                <a href="#">Features</a>
-                <a href="#">About</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="prompt-section">
+            <h2 class="section-title">Create Your Quiz</h2>
+            <p class="section-description">Enter a topic, paste your study material, or upload a PDF to generate a personalized quiz.</p>
+            <textarea id="prompt" placeholder="Enter your topic or paste study material here..."></textarea>
+            <div class="button-row">
+                <div class="pdf-upload-container">
+                    <label for="pdfUpload" class="pdf-upload-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                            <path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2zm2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2z"/>
+                        </svg>
+                        Upload PDF
+                    </label>
+                    <input type="file" id="pdfUpload" accept=".pdf">
+                    <div id="fileNameDisplay"></div>
+                </div>
+                <button id="generateBtn" class="generate-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                    </svg>
+                    Generate Quiz
+                </button>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Crafting your personalized quiz...</p>
+            <p class="loading-subtext">This may take a moment as our AI analyzes your content</p>
+        </div>
+
+        <div id="quizSection" class="quiz-section">
+            <h2 class="section-title">Your Quiz</h2>
+            <div id="questions"></div>
+            <button id="submitQuiz" class="submit-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                </svg>
+                Submit Quiz
+            </button>
+        </div>
+
+        <div id="resultsSection" class="results-section">
+            <h2 class="section-title">Quiz Results</h2>
+            <div class="score"></div>
+            <div id="review"></div>
+            <button id="newQuiz" class="new-quiz-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+                Create New Quiz
+            </button>
+        </div>
+    </main>
+
+    <script>
+        let currentQuiz = [];
+        let selectedAnswers = {};
+
+        document.getElementById('generateBtn').addEventListener('click', generateQuiz);
+        document.getElementById('submitQuiz').addEventListener('click', submitQuiz);
+        document.getElementById('newQuiz').addEventListener('click', resetQuiz);
+        
+        // Handle PDF file selection
+        document.getElementById('pdfUpload').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : '';
+            document.getElementById('fileNameDisplay').textContent = fileName;
+        });
+
+        async function generateQuiz() {
+            const prompt = document.getElementById('prompt').value.trim();
+            const pdfFile = document.getElementById('pdfUpload').files[0];
+            const errorMsg = document.getElementById('errorMessage');
+            
+            // Hide any previous error messages
+            errorMsg.style.display = 'none';
+            
+            // Input validation - either prompt or PDF is required
+            if (!prompt && !pdfFile) {
+                errorMsg.textContent = 'Please enter a topic/study material or upload a PDF';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            document.querySelector('.loading').style.display = 'block';
+            document.querySelector('.prompt-section').style.display = 'none';
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            try {
+                let response;
+                let data;
+                
+                // If PDF file is selected, use the PDF upload endpoint
+                if (pdfFile) {
+                    // Check file size (max 10MB)
+                    if (pdfFile.size > 10 * 1024 * 1024) {
+                        throw new Error('PDF file size exceeds 10MB limit');
+                    }
+                    
+                    const formData = new FormData();
+                    formData.append('pdf', pdfFile);
+                    
+                    // Add prompt as additional context if provided
+                    if (prompt) {
+                        formData.append('topic', prompt);
+                    }
+                    
+                    response = await fetch('http://localhost:5000/api/generate-quiz-from-pdf', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    // Use the text-based endpoint
+                    response = await fetch('http://localhost:5000/generate-quiz', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: prompt })
+                    });
+                }
+
+                data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to generate quiz');
+                }
+
+                currentQuiz = data;
+                displayQuiz(data);
+                
+                // Clear the file input and filename display
+                document.getElementById('pdfUpload').value = '';
+                document.getElementById('fileNameDisplay').textContent = '';
+                
+            } catch (error) {
+                errorMsg.textContent = error.message || 'An error occurred while generating the quiz. Please try again.';
+                errorMsg.style.display = 'block';
+                document.querySelector('.prompt-section').style.display = 'block';
+            } finally {
+                document.querySelector('.loading').style.display = 'none';
+            }
+        }
+
+        function displayQuiz(questions) {
+            const questionsContainer = document.getElementById('questions');
+            questionsContainer.innerHTML = '';
+            selectedAnswers = {};
+
+            questions.forEach((q, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((opt, i) => `
+                            <div class="option" data-question="${index}" data-option="${opt}">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                questionsContainer.appendChild(questionCard);
+            });
+
+            // Add click handlers for options
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', selectOption);
+            });
+
+            document.getElementById('quizSection').style.display = 'block';
+        }
+
+        function selectOption(e) {
+            const questionIndex = e.target.dataset.question;
+            const selectedOption = e.target.dataset.option;
+
+            // Remove selection from other options in the same question
+            const questionOptions = document.querySelectorAll(`.option[data-question="${questionIndex}"]`);
+            questionOptions.forEach(opt => opt.classList.remove('selected'));
+
+            // Add selection to clicked option
+            e.target.classList.add('selected');
+            selectedAnswers[questionIndex] = selectedOption;
+        }
+
+        function submitQuiz() {
+            if (Object.keys(selectedAnswers).length < currentQuiz.length) {
+                alert('Please answer all questions before submitting.');
+                return;
+            }
+
+            let score = 0;
+            const review = document.getElementById('review');
+            review.innerHTML = '';
+
+            currentQuiz.forEach((q, index) => {
+                const userAnswer = selectedAnswers[index];
+                const isCorrect = userAnswer === q.correct;
+                if (isCorrect) score++;
+
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-question';
+                reviewItem.innerHTML = `
+                    <p><strong>Question ${index + 1}:</strong> ${q.question}</p>
+                    <p class="${isCorrect ? 'correct' : 'incorrect'}">Your answer: ${userAnswer}</p>
+                    ${!isCorrect ? `<p class="correct">Correct answer: ${q.correct}</p>` : ''}
+                `;
+                review.appendChild(reviewItem);
+            });
+
+            document.querySelector('.score').textContent = 
+                `Score: ${score} out of ${currentQuiz.length} (${Math.round(score/currentQuiz.length * 100)}%)`;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        function resetQuiz() {
+            document.getElementById('prompt').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.querySelector('.prompt-section').style.display = 'block';
+            currentQuiz = [];
+            selectedAnswers = {};
+        }
+    </script>
+
             </div>
         </div>
     </header>
@@ -202,37 +897,94 @@
         <section class="hero">
             <h1>Master Your Studies with AI</h1>
             <p>Transform your study material into interactive quizzes instantly. Perfect for last-minute revision and effective learning.</p>
-            <button class="cta-button" onclick="showQuizForm()">Get Started</button>
+            <button class="cta-button" onclick="showQuizForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/>
+                </svg>
+                Get Started
+            </button>
         </section>
 
         <section class="features">
             <div class="feature-card">
-                <h3>Instant Quiz Generation</h3>
-                <p>Upload your study material or enter topics to get AI-generated quizzes in seconds</p>
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5 1.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1zm0 4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1zm0 4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1zm-3-9a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
+                    </svg>
+                    Instant Quiz Generation
+                </h3>
+                <p>Upload your study material or enter topics to get AI-generated quizzes in seconds. No more manual question creation.</p>
             </div>
             <div class="feature-card">
-                <h3>Smart Learning</h3>
-                <p>Adaptive questions that help you focus on what you need to learn</p>
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484-.08.08-.162.158-.242.234-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 1 2.04 4.327Z"/>
+                    </svg>
+                    Smart Learning
+                </h3>
+                <p>Adaptive questions that help you focus on what you need to learn. Our AI crafts questions based on your specific content.</p>
             </div>
             <div class="feature-card">
-                <h3>Time-Efficient</h3>
-                <p>Perfect for last-minute revision and quick knowledge checks</p>
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z"/>
+                        <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/>
+                        <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
+                    Time-Efficient
+                </h3>
+                <p>Perfect for last-minute revision and quick knowledge checks. Generate comprehensive quizzes in seconds, not hours.</p>
             </div>
         </section>
 
         <!-- Quiz Creation Form -->
         <form id="quizForm" class="quiz-form">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+                    <path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                Create Your Custom Quiz
+            </h2>
             <div class="form-group">
                 <label for="topic">Topic or Subject</label>
                 <input type="text" id="topic" placeholder="e.g., World War II, Photosynthesis, Machine Learning" required>
+                <p>Enter the main topic or subject for your quiz</p>
             </div>
             <div class="form-group">
                 <label for="material">Study Material (Optional)</label>
                 <textarea id="material" placeholder="Paste your notes, textbook excerpts, or any study material here..."></textarea>
+                <p>Add specific content to generate more targeted questions</p>
+            </div>
+            <div class="form-group">
+                <label for="pdfUpload">Upload PDF for Quiz (Optional)</label>
+                <div class="custom-file-upload">
+                    <input type="file" id="pdfUpload" accept=".pdf" class="file-input">
+                    <label for="pdfUpload" class="file-upload-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                            <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                        </svg>
+                        Choose PDF File
+                    </label>
+                </div>
+                <p class="file-info">Max size: 10MB. Text-based PDFs only.</p>
             </div>
             <div class="form-buttons">
-                <button type="button" class="cancel-button" onclick="hideQuizForm()">Cancel</button>
-                <button type="submit" class="cta-button">Generate Quiz</button>
+                <button type="button" class="cancel-button" onclick="hideQuizForm()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                    Cancel
+                </button>
+                <button type="submit" class="cta-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                    </svg>
+                    Generate Quiz
+                </button>
             </div>
         </form>
     </main>
@@ -246,17 +998,79 @@
             document.getElementById('quizForm').classList.remove('active');
         }
 
-        document.getElementById('quizForm').addEventListener('submit', function(e) {
+        document.getElementById('quizForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const topic = document.getElementById('topic').value;
             const material = document.getElementById('material').value;
+            const pdfFile = document.getElementById('pdfUpload').files[0];
             
-            // For now, just show an alert
-            alert('Quiz generation coming soon!\nTopic: ' + topic + '\nMaterial: ' + (material || 'None provided'));
+            // Hide any previous error messages
+            const errorMsg = document.getElementById('errorMessage');
+            errorMsg.style.display = 'none';
             
-            // Reset form
-            this.reset();
+            // Show loading state
+            document.querySelector('.loading').style.display = 'block';
+            document.querySelector('.prompt-section').style.display = 'none';
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
             hideQuizForm();
+            
+            try {
+                let response;
+                let data;
+                
+                // If PDF file is selected, use the PDF upload endpoint
+                if (pdfFile) {
+                    // Check file size (max 10MB)
+                    if (pdfFile.size > 10 * 1024 * 1024) {
+                        throw new Error('PDF file size exceeds 10MB limit');
+                    }
+                    
+                    const formData = new FormData();
+                    formData.append('pdf', pdfFile);
+                    
+                    // Add topic as additional context if provided
+                    if (topic) {
+                        formData.append('topic', topic);
+                    }
+                    
+                    response = await fetch('http://localhost:5000/api/generate-quiz-from-pdf', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    // Use the text-based endpoint
+                    let promptText = topic;
+                    if (material) {
+                        promptText += '\n\n' + material;
+                    }
+                    
+                    response = await fetch('http://localhost:5000/generate-quiz', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: promptText })
+                    });
+                }
+                
+                data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to generate quiz');
+                }
+                
+                currentQuiz = data;
+                displayQuiz(data);
+            } catch (error) {
+                errorMsg.textContent = error.message || 'An error occurred while generating the quiz. Please try again.';
+                errorMsg.style.display = 'block';
+                document.querySelector('.prompt-section').style.display = 'block';
+            } finally {
+                document.querySelector('.loading').style.display = 'none';
+                // Reset form
+                document.getElementById('quizForm').reset();
+            }
         });
     </script>
 </body>
